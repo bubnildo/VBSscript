@@ -1,0 +1,67 @@
+﻿#$language = "VBScript"
+#$interface = "1.0"
+
+Sub Main
+	
+crt.Screen.Synchronous = True
+
+ set taba = crt.GetActiveTab
+ IPSPV = taba.Caption
+ if InStr(IPSPV, ":") <> 0 then
+  IPSPV2 = split(IPSPV, ":")
+  IP = IPSPV2(0) 
+  SPV = IPSPV2(1) 
+ end if
+
+'     'Какой'&@CRLF&'то'&@CRLF&'текст'
+ RTF = InputBox("Файлы прошивки:1 - 063, 2 - 073" ,"Ericsson","0")
+ RTF = trim(RTF)
+
+' if RTF <> 1 or RTF <> 2 or RTF = "" then
+'  Exit sub
+' end if
+
+ if RTF = 1 then RTFs = "file:///scratch/t06xg_4_7_0" end if
+ if RTF = 2 then RTFs = "file:///scratch/CXC_173_3063_R4118427R5F" end if
+
+ if RTFs = "file:///scratch/t06xg_4_7_0" or RTFs = "file:///scratch/CXC_173_3063_R4118427R5F" then 
+  crt.Screen.Send "enable" & chr(13)
+  crt.screen.WaitForString("#")
+  crt.Screen.Send "retrofit ont ont-" + SPV + " " + RTFs & chr(13)
+
+  Do
+   crt.Screen.Send "show ont ont-" + SPV + " st" & chr(13)
+   RTFst = crt.screen.WaitForStrings("  ACT,SWDL", "stop", "STOP", 5)
+   if RTFst = 2 or RTFst = 3 then
+    Exit sub
+   end if
+   crt.sleep 10000
+  Loop While RTFst = 1
+
+  Do
+   crt.Screen.Send "retrofit ont ont-" + SPV + " commit" & chr(13)
+   RTFst = crt.screen.WaitForStrings("(error) txtcli: SNVS OMCC link is down", "(error) txtcli: SNVS software upgrade is still in progress", "stop", "STOP", 5)
+   if RTFst = 3 or RTFst = 4 then
+    Exit sub
+   end if
+   crt.sleep 10000
+  Loop While RTFst = 1
+
+  crt.Screen.Send "show ont ont-" + SPV + " software" & chr(13)
+
+ end if
+
+
+
+' crt.Screen.Send "show ont ont-" + SPV + " software" & chr(13)
+' crt.Screen.Send "enable" & chr(13)
+' crt.Screen.Send "remove ont ont-"+SPV & chr(13)
+' crt.Screen.Send "show ont ont-"+SPV+" state" & chr(13)
+' crt.Screen.Send "restore ont ont-"+SPV & chr(13)
+' crt.Screen.Send "show ont ont-"+SPV+" port state" & chr(13)
+' crt.Screen.Send "show ont ont-"+SPV+" state" & chr(13)
+
+crt.Screen.Synchronous = False
+
+End Sub
+
